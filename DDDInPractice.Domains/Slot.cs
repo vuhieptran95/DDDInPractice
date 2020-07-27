@@ -21,6 +21,11 @@ namespace DDDInPractice.Domains
         
         public void DecreaseQuantity()
         {
+            if (ProductCount < 1)
+            {
+                throw new Exception("No items left in this slot");
+            }
+            
             ProductCount -= 1;
         }
 
