@@ -22,8 +22,8 @@ namespace DDDInPractice.Domains.Test
             _sampleSlot2 = new Slot(2, "2", 15, 10, 2);
             _sampleSlot3 = new Slot(3, "3", 20, 15, 3);
             _zeroQuantitySlot = new Slot(4, "4", 0, 50, 4);
-            _machineMoney = new Money(200, 100, 50, 20, 10, 0);
-            _customerMoney = new Money(0, 0, 0, 1, 0, 0);
+            _machineMoney = new Money(200, 100, 50, 20, 10, 10, 4);
+            _customerMoney = new Money(0, 0, 0, 1, 0, 0, 0);
         }
 
         public new class AddSlotsTest : SnackMachineTest
@@ -188,7 +188,7 @@ namespace DDDInPractice.Domains.Test
             [Fact]
             public void SomeCustomerMoneyLeft_ReturnMoneyUsingLargeToSmallNotes()
             {
-                var cusMoney = new Money(0, 0, 0, 0, 5, 0);
+                var cusMoney = new Money(0, 0, 0, 0, 5, 0, 0);
 
                 TakeMoney(cusMoney);
 
