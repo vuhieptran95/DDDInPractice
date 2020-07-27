@@ -8,19 +8,25 @@ namespace DDDInPractice.Domains
     public class SnackMachine
     {
         protected ICollection<Slot> slots;
+        protected ICollection<Slot> selectedSlots;
         protected Money machineMoney;
-        protected decimal customerMoney;
-        protected decimal initialcustomerMoney;
+        protected int currentAmountCustomerMoney;
+        protected Money initialCustomerMoney;
+        protected bool isInTransaction;
 
         public SnackMachine()
         {
             slots = new List<Slot>();
-            machineMoney = new Money(0,0,0,0,0,0);
+            selectedSlots = new List<Slot>();
+            initialCustomerMoney = new Money();
+            machineMoney = new Money();
         }
 
         public Money MachineMoney => machineMoney;
-        public decimal CustomerMoney => customerMoney;
+        public bool IsInTransaction => isInTransaction;
+        public int CurrentAmountCustomerMoney => currentAmountCustomerMoney;
         public IEnumerable<Slot> Slots => slots;
+        public IEnumerable<Slot> SelectedSlots => selectedSlots;
 
         public void AddSlots(Slot slot)
         {
@@ -28,11 +34,12 @@ namespace DDDInPractice.Domains
             {
                 throw new Exception("Cannot add null slot");
             }
-            if (Slots.Count() > 2)
+
+            if (Slots.Count() > 15)
             {
-                throw new Exception("Cannot add more slot. Machine can only have maximum 3 slots");
+                throw new Exception("Cannot add more slot. Machine can only have maximum 16 slots");
             }
-            
+
             slots.Add(slot);
         }
 
@@ -43,63 +50,92 @@ namespace DDDInPractice.Domains
 
         public void TakeMoney(Money money)
         {
-            customerMoney = money.TotalInDollars();
-            initialcustomerMoney = customerMoney;
-            
+            currentAmountCustomerMoney += money.Total();
+            initialCustomerMoney += money;
+
             machineMoney += money;
         }
 
-        public void HandleBuy(Slot slot)
+        public void StartTransaction()
+        {
+            isInTransaction = true;
+
+            // Clear customer money
+            currentAmountCustomerMoney = 0;
+            initialCustomerMoney = new Money();
+            
+            // Raise Transaction started event
+        }
+
+        public void HandleSelectItems(Slot slot)
         {
             var actualSlot = Slots.FirstOrDefault(s => s.Position == slot.Position);
             if (actualSlot == null)
             {
                 throw new Exception("The item you're trying to buy doesn't exist");
             }
-            
-            if (actualSlot.Price > customerMoney)
+
+            if (actualSlot.Price > currentAmountCustomerMoney)
             {
-                throw new Exception("You don't have enough money to buy this item");
+                throw new Exception("You don't have enough money left to buy this item");
             }
-            
+
             actualSlot.DecreaseQuantity();
-            
-            customerMoney -= actualSlot.Price;
+
+            currentAmountCustomerMoney -= actualSlot.Price;
+
+            selectedSlots.Add(actualSlot);
+        }
+
+        public void RemoveLastSelectedSlot()
+        {
+            if (selectedSlots.Count < 1)
+            {
+                throw new Exception("You haven't chosen a slot yet");
+            }
+
+            var lastSlot = selectedSlots.Last();
+
+            currentAmountCustomerMoney += lastSlot.Price;
+            lastSlot.IncreaseQuantity();
+            selectedSlots.Remove(lastSlot);
         }
 
         public void ReturnMoney()
         {
-            if (customerMoney == 0m)
+            if (currentAmountCustomerMoney == 0)
             {
                 throw new Exception("You have spent all your money, nothing left to return!");
             }
-            
-            if (initialcustomerMoney == customerMoney)
-            {
-                throw new Exception("You haven't bought anything yet! Please choose an item.");
-            }
         }
 
-        public Money BreakdownMoneyLargeToSmall(decimal amount)
+        public bool IsAbleToReturnMoney()
         {
-            (int Cent, int Penny, int Quarter, int OneDollar, int FiveDollar, int TwentyDollar) money = (0, 0, 0, 0, 0,
-                0);
-            var remain = Convert.ToInt32(amount * 100);
-
-            money.TwentyDollar = remain / 2000;
-            remain = remain % 2000;
-            money.FiveDollar = remain / 500;
-            remain = remain % 500;
-            money.OneDollar = remain / 100;
-            remain = remain % 100;
-            money.Quarter = remain / 25;
-            remain = remain % 25;
-            money.Penny = remain / 10;
-            remain = remain % 10;
-            money.Cent = remain;
-            
-            return new Money(money.Cent, money.Penny, money.Quarter, money.OneDollar, money.FiveDollar, money.TwentyDollar);
+            return false;
         }
 
+        public void CommitTransaction()
+        {
+            // Machine does its job
+            
+            // Return changes to customers
+            
+            // Reset selectedSlots
+            
+            // Finish transaction
+            
+            // Add transaction committed event
+        }
+
+        public void CancelTransaction()
+        {
+            // Rollback selected slots and reset
+            
+            // Return customer's money
+            
+            // Finish transaction
+            
+            // Add transaction cancelled event
+        }
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
@@ -18,12 +18,12 @@ namespace DDDInPractice.Domains.Test
 
         public SnackMachineTest()
         {
-            _sampleSlot1 = new Slot(1, "1", 10, 1m, 1);
-            _sampleSlot2 = new Slot(2, "2", 15, 10.05m, 2);
-            _sampleSlot3 = new Slot(3, "3", 20, 2.02m, 3);
-            _zeroQuantitySlot = new Slot(4, "4", 0, 1.01m, 4);
-            _machineMoney = new Money(500, 100, 100, 100, 100, 100);
-            _customerMoney = new Money(0, 10, 4, 1, 1, 0);
+            _sampleSlot1 = new Slot(1, "1", 10, 5, 1);
+            _sampleSlot2 = new Slot(2, "2", 15, 10, 2);
+            _sampleSlot3 = new Slot(3, "3", 20, 15, 3);
+            _zeroQuantitySlot = new Slot(4, "4", 0, 50, 4);
+            _machineMoney = new Money(200, 100, 50, 20, 10, 0);
+            _customerMoney = new Money(0, 0, 0, 1, 0, 0);
         }
 
         public new class AddSlotsTest : SnackMachineTest
@@ -46,103 +46,147 @@ namespace DDDInPractice.Domains.Test
             }
 
             [Fact]
-            public void CanOnlyHaveMaximum3Slots()
+            public void CanOnlyHaveMaximum16Slots()
             {
-                slots = new List<Slot>() {_sampleSlot1, _sampleSlot1, _sampleSlot1};
+                slots = new List<Slot>();
+
+                for (int i = 0; i < 16; i++)
+                {
+                    slots.Add(_sampleSlot1);
+                }
 
                 Action action = () => AddSlots(_sampleSlot1);
 
-                action.Should().Throw<Exception>("Cannot add more slot. Machine can only have maximum 3 slots");
+                action.Should().Throw<Exception>("Cannot add more slot. Machine can only have maximum 16 slots");
             }
         }
 
-        public class HandleBuyTest : SnackMachineTest
+        public class StartTransactionTest : SnackMachineTest
         {
-            private decimal initialMoney;
-            private decimal initialCustomerMoney;
+            [Fact]
+            public void WhenStart_FlagIsSetToTrue_CustomerMoneyResets()
+            {
+                this.StartTransaction();
+
+                isInTransaction.Should().Be(true);
+                currentAmountCustomerMoney.Should().Be(0);
+                initialCustomerMoney.Should().Be(new Money());
+            }
+        }
+
+        public class HandleSelectItemsTest : SnackMachineTest
+        {
+            private Money initialMachineMoney;
             private int quantity;
 
-            public HandleBuyTest()
+            public HandleSelectItemsTest()
             {
+                StartTransaction();
+
                 LoadMoney(_machineMoney);
-                initialMoney = _machineMoney.TotalInDollars();
+                initialMachineMoney = _machineMoney.DeepClone();
 
                 slots = new List<Slot>() {_sampleSlot1, _sampleSlot2, _zeroQuantitySlot};
                 quantity = _sampleSlot1.ProductCount;
 
                 TakeMoney(_customerMoney);
-                initialCustomerMoney = customerMoney;
             }
 
             [Fact]
             public void TakeCustomerMoney_MachineMoneyIncreaseSameAmount()
             {
-                machineMoney.TotalInDollars().Should().Be(initialMoney + _customerMoney.TotalInDollars());
+                machineMoney.Should().Be(initialMachineMoney + _customerMoney);
             }
 
             [Fact]
-            public void SuccessPurchase_SlotQuantityDecrease1_CustomerMoneyDecreaseBySlotPrice()
+            public void SelectASlot_SlotQuantityDecrease1_SelectedSlotIncrease1_CustomerMoneyDecreaseBySlotPrice()
             {
-                HandleBuy(_sampleSlot1);
+                var selectedSlotsCount = selectedSlots.Count;
+                var currentCustMoney = currentAmountCustomerMoney;
+
+                HandleSelectItems(_sampleSlot1);
 
                 _sampleSlot1.ProductCount.Should().Be(quantity - 1);
 
-                customerMoney.Should().Be(initialCustomerMoney - _sampleSlot1.Price);
+                selectedSlots.Count.Should().Be(selectedSlotsCount + 1);
+
+                selectedSlots.Last().Should().Be(_sampleSlot1);
+
+                currentAmountCustomerMoney.Should().Be(currentCustMoney - _sampleSlot1.Price);
             }
 
             [Fact]
-            public void FailedPurchase_NoItemLeftInSlot_ThrowException_CustomerMoneyStayTheSame()
+            public void SelectASlot_NoItemLeftInSlot_ThrowException()
             {
-                Action action = () => HandleBuy(_zeroQuantitySlot);
+                var selectedSlotsCount = selectedSlots.Count;
+                var currentCustMoney = currentAmountCustomerMoney;
+
+                Action action = () => HandleSelectItems(_zeroQuantitySlot);
 
                 action.Should().Throw<Exception>().WithMessage("No items left in this slot");
 
-                _zeroQuantitySlot.ProductCount.Should().Be(0);
-
-                customerMoney.Should().Be(initialCustomerMoney);
+                selectedSlots.Count.Should().Be(selectedSlotsCount);
+                currentAmountCustomerMoney.Should().Be(currentCustMoney);
             }
 
             [Fact]
             public void
-                FailedPurchase_NotEnoughCustomerMoney_ThrowException_CustomerMoneyStayTheSame_SlotQuantityStayTheSame()
+                SelectASlot_NotEnoughCustomerMoney_ThrowException()
             {
                 var intitialQuantity = _sampleSlot2.ProductCount;
+                var selectedSlotsCount = selectedSlots.Count;
 
-                Action action = () => HandleBuy(_sampleSlot2);
+                currentAmountCustomerMoney = 5;
+                var currentCustMoney = currentAmountCustomerMoney;
 
-                action.Should().Throw<Exception>().WithMessage("You don't have enough money to buy this item");
+                Action action = () => HandleSelectItems(_sampleSlot2);
+
+                action.Should().Throw<Exception>().WithMessage("You don't have enough money left to buy this item");
 
                 _sampleSlot2.ProductCount.Should().Be(intitialQuantity);
-
-                customerMoney.Should().Be(initialCustomerMoney);
+                selectedSlots.Count.Should().Be(selectedSlotsCount);
+                currentAmountCustomerMoney.Should().Be(currentCustMoney);
             }
 
             [Fact]
-            public void FailedPurchase_BuyANonExistSlot_ThrowException_CustomerMoneyStayTheSame()
+            public void SelectANonExistSlot_ThrowException()
             {
-                Action action = () => HandleBuy(_sampleSlot3);
+                var selectedSlotsCount = selectedSlots.Count;
+
+                Action action = () => HandleSelectItems(_sampleSlot3);
 
                 action.Should().Throw<Exception>().WithMessage("The item you're trying to buy doesn't exist");
-
-                customerMoney.Should().Be(initialCustomerMoney);
+                selectedSlots.Count.Should().Be(selectedSlotsCount);
             }
         }
 
         public class ReturnMoneyTest : SnackMachineTest
         {
-            private decimal initialMoney;
-            private decimal initialCustomerMoney;
+            private Money _initialMachineMoney;
 
             public ReturnMoneyTest()
             {
                 LoadMoney(_machineMoney);
-                initialMoney = _machineMoney.TotalInDollars();
+                _initialMachineMoney = _machineMoney.DeepClone();
 
                 slots = new List<Slot>() {_sampleSlot1, _sampleSlot2, _zeroQuantitySlot};
             }
 
             [Fact]
-            public void CustomerBuyNothing_ThrowException_MachineMoneyStayTheSame()
+            public void NoCustomerMoneyLeft_ThrowException()
+            {
+                currentAmountCustomerMoney = 0;
+
+                Action action = ReturnMoney;
+
+                action.Should().Throw<Exception>()
+                    .WithMessage("You have spent all your money, nothing left to return!");
+
+                machineMoney.Total().Should().Be(_initialMachineMoney.Total() + currentAmountCustomerMoney);
+            }
+
+            [Fact]
+            public void SomeCustomerMoneyLeft_ReturnMoneyUsingLargeToSmallNotes()
             {
                 var cusMoney = new Money(0, 0, 0, 0, 5, 0);
 
@@ -153,97 +197,36 @@ namespace DDDInPractice.Domains.Test
                 action.Should().Throw<Exception>()
                     .WithMessage("You haven't bought anything yet! Please choose an item.");
 
-                machineMoney.TotalInDollars().Should().Be(initialMoney + customerMoney);
+                machineMoney.Should().Be(_initialMachineMoney + cusMoney);
+            }
+        }
+        
+        public class RemoveLastSelectedSlotTest : SnackMachineTest
+        {
+            [Fact]
+            public void NoSlotsInSelectedSlots_ThrowException()
+            {
+                currentAmountCustomerMoney = 100;
+                selectedSlots = new List<Slot>();
+                
+                Action action = RemoveLastSelectedSlot;
+
+                action.Should().Throw<Exception>().WithMessage("You haven't chosen a slot yet");
+                currentAmountCustomerMoney.Should().Be(100);
             }
 
             [Fact]
-            public void NoCustomerMoneyLeft_ThrowException_MachineMoneyStayTheSame()
+            public void SelectedSlotsHaveItems_RemoveLastOne()
             {
-                var cusMoney = new Money(0, 0, 0, 0, 0, 0);
-                TakeMoney(cusMoney);
-
-                Action action = ReturnMoney;
-
-                action.Should().Throw<Exception>()
-                    .WithMessage("You have spent all your money, nothing left to return!");
-
-                machineMoney.TotalInDollars().Should().Be(initialMoney + customerMoney);
+                currentAmountCustomerMoney = 100;
+                selectedSlots = new List<Slot>(){_sampleSlot1};
+                var count = _sampleSlot1.ProductCount;
                 
-            }
+                RemoveLastSelectedSlot();
 
-            [Theory]
-            [InlineData("0.77", 2, 0, 3, 0, 0, 0)]
-            [InlineData("1", 0, 0, 0, 1, 0, 0)]
-            [InlineData("1.02", 2, 0, 0, 1, 0, 0)]
-            [InlineData("1.12", 2, 1, 0, 1, 0, 0)]
-            [InlineData("1.25", 0, 0, 1, 1, 0, 0)]
-            [InlineData("1.35", 0, 1, 1, 1, 0, 0)]
-            [InlineData("5", 0, 0, 0, 0, 1, 0)]
-            [InlineData("6.02", 2, 0, 0, 1, 1, 0)]
-            [InlineData("6.12", 2, 1, 0, 1, 1, 0)]
-            [InlineData("6.25", 0, 0, 1, 1, 1, 0)]
-            [InlineData("6.35", 0, 1, 1, 1, 1, 0)]
-            [InlineData("6.37", 2, 1, 1, 1, 1, 0)]
-            public void BreakDownMoneyLargeToSmall(string amount, int cent, int penny, int quarter, int oneDollar, int fiveDollar,
-                int twentyDollar)
-            {
-                var breakDownAmount = Math.Round(Convert.ToDecimal(amount), 2);
-
-                var money = BreakdownMoneyLargeToSmall(breakDownAmount);
-                
-                var expected = new Money(cent, penny, quarter, oneDollar, fiveDollar, twentyDollar);
-
-                money.FullyEquals(expected).Should().BeTrue();
-            }
-
-            [Theory] // Always assume machine money is sufficient to be returned
-            [InlineData(10, 10, 10, 10, 10, 10, "0.77", 8, 10, 7, 10, 10, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "1", 10, 10, 10, 9, 10, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "1.02", 8, 10, 10, 9, 10, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "1.12", 8, 9, 10, 9, 10, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "1.25", 10, 10, 9, 9, 10, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "1.35", 10, 9, 9, 9, 10, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "1.37", 8, 9, 9, 9, 10, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "5", 10, 10, 10, 10, 9, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "6.02", 8, 10, 10, 9, 9, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "6.12", 8, 9, 10, 9, 9, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "6.25", 10, 10, 9, 9, 9, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "6.35", 10, 9, 9, 9, 9, 10)]
-            [InlineData(10, 10, 10, 10, 10, 10, "6.37", 8, 9, 9, 9, 9, 10)]
-            [InlineData(10, 10, 10, 5, 0, 0, "5", 10, 10, 10, 0, 0, 0)]
-            [InlineData(10, 10, 10, 5, 0, 0, "6.02", 8, 10, 6, 0, 0, 0)]
-            [InlineData(10, 10, 10, 5, 0, 0, "6.12", 8, 9, 6, 0, 0, 0)]
-            [InlineData(10, 10, 10, 5, 0, 0, "6.25", 10, 10, 5, 0, 0, 0)]
-            [InlineData(10, 10, 10, 5, 0, 0, "6.35", 10, 9, 5, 0, 0, 0)]
-            [InlineData(10, 10, 10, 5, 0, 0, "6.37", 8, 9, 5, 0, 0, 0)]
-            [InlineData(10, 10, 10, 10, 2, 0, "15", 10, 10, 10, 5, 0, 0)]
-            [InlineData(10, 10, 10, 10, 2, 0, "16.02", 8, 10, 10, 4, 0, 0)]
-            [InlineData(10, 10, 10, 10, 2, 0, "16.12", 8, 9, 10, 4, 0, 0)]
-            [InlineData(10, 10, 10, 10, 2, 0, "16.25", 10, 10, 9, 4, 0, 0)]
-            [InlineData(10, 10, 10, 10, 2, 0, "16.35", 10, 9, 9, 4, 0, 0)]
-            [InlineData(10, 10, 10, 10, 2, 0, "16.37", 8, 9, 9, 4, 0, 0)]
-            [InlineData(10, 10, 10, 10, 10, 0, "15", 10, 10, 10, 10, 7, 0)]
-            [InlineData(10, 10, 10, 10, 10, 0, "16.02", 8, 10, 10, 9, 7, 0)]
-            [InlineData(10, 10, 10, 10, 10, 0, "16.12", 8, 9, 10, 9, 7, 0)]
-            [InlineData(10, 10, 10, 10, 10, 0, "16.25", 10, 10, 9, 9, 7, 0)]
-            [InlineData(10, 10, 10, 10, 10, 0, "16.35", 10, 9, 9, 9, 7, 0)]
-            [InlineData(10, 10, 10, 10, 10, 0, "16.37", 8, 9, 9, 9, 7, 0)]
-            public void
-                SomeCustomerMoneyLeft_ReturnTheirMoneyFromLargeToSmall_CustomerMoneyBackToZero_MachineMoneySubtractReturnValue(
-                    int cent, int penny, int quarter, int oneDollar, int fiveDollar, int twentyDollar,
-                    string customerMoneyLeft, int afterCent, int afterPenny, int afterQuarter, int afterOneDollar,
-                    int afterFiveDollar, int afterTwentyDollar)
-            {
-                customerMoney = Math.Round(Convert.ToDecimal(customerMoneyLeft), 2);
-
-                machineMoney = new Money(cent, penny, quarter, oneDollar, fiveDollar, twentyDollar);
-
-                var expected = new Money(afterCent, afterPenny, afterQuarter, afterOneDollar, afterFiveDollar,
-                    afterTwentyDollar);
-
-                ReturnMoney();
-
-                machineMoney.FullyEquals(expected).Should().Be(true);
+                selectedSlots.Count.Should().Be(0);
+                _sampleSlot1.ProductCount.Should().Be(count + 1);
+                currentAmountCustomerMoney.Should().Be(105);
             }
         }
     }

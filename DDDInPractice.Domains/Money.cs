@@ -8,37 +8,30 @@ namespace DDDInPractice.Domains
         {
         }
 
-        public Money(int oneCent, int penny, int quarter, int oneDollar, int fiveDollar, int twentyDollar)
+        public Money(int five, int ten, int twenty, int fifty, int oneHundred, int twoHundred)
         {
-            OneCent = oneCent;
-            Penny = penny;
-            Quarter = quarter;
-            OneDollar = oneDollar;
-            FiveDollar = fiveDollar;
-            TwentyDollar = twentyDollar;
+            Five = five;
+            Ten = ten;
+            Twenty = twenty;
+            Fifty = fifty;
+            OneHundred = oneHundred;
+            TwoHundred = twoHundred;
         }
 
-        public int OneCent { get; }
-        public int Penny { get; }
-        public int Quarter { get; }
-        public int OneDollar { get; }
-        public int FiveDollar { get; }
-        public int TwentyDollar { get; }
+        public int Five { get; }
+        public int Ten { get; }
+        public int Twenty { get; }
+        public int Fifty { get; }
+        public int OneHundred { get; }
+        public int TwoHundred { get; }
 
         public bool Equals(Money other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return this.TotalInCent() == other.TotalInCent();
-        }
-        
-        public bool FullyEquals(Money other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return this.OneCent == other.OneCent && this.Penny == other.Penny && this.Quarter == other.Quarter &&
-                   this.OneDollar == other.OneDollar && this.FiveDollar == other.FiveDollar &&
-                   this.TwentyDollar == other.TwentyDollar;
+            return this.Five == other.Five && this.Ten == other.Ten && this.Twenty == other.Twenty &&
+                   this.Fifty == other.Fifty && this.OneHundred == other.OneHundred &&
+                   this.TwoHundred == other.TwoHundred;
         }
 
         public override bool Equals(object obj)
@@ -51,24 +44,39 @@ namespace DDDInPractice.Domains
 
         public static Money operator +(Money m1, Money m2)
         {
-            return new Money(m1.OneCent + m2.OneCent, m1.Penny + m2.Penny, m1.Quarter + m2.Quarter,
-                m1.OneDollar + m2.OneDollar, m1.FiveDollar + m2.FiveDollar, m1.TwentyDollar + m2.TwentyDollar);
+            return new Money(m1.Five + m2.Five, m1.Ten + m2.Ten, m1.Twenty + m2.Twenty,
+                m1.Fifty + m2.Fifty, m1.OneHundred + m2.OneHundred, m1.TwoHundred + m2.TwoHundred);
         }
-        
-        
+
+        public static Money operator -(Money money, int amount)
+        {
+            if (amount < 0)
+            {
+                throw new Exception("The subtracted amount of money must be greater than 0");
+            }
+
+            if (money.Total() - amount < 0)
+            {
+                throw new Exception("The subtracted amount is too big");
+            }
+
+            return new Money();
+        }
+
+        public Money DeepClone()
+        {
+            return new Money(this.Five, this.Ten, this.Twenty, this.Fifty, this.OneHundred, this.TwoHundred);
+        }
+
+
         public override int GetHashCode()
         {
-            return HashCode.Combine(OneCent, Penny, Quarter, OneDollar, FiveDollar, TwentyDollar);
+            return HashCode.Combine(Five, Ten, Twenty, Fifty, OneHundred, TwoHundred);
         }
 
-        public int TotalInCent()
+        public int Total()
         {
-            return OneCent + 10 * Penny + 25 * Quarter + 100 * OneDollar + 500 * FiveDollar + 2000 * TwentyDollar;
-        }
-
-        public decimal TotalInDollars()
-        {
-            return Math.Round(Convert.ToDecimal((double) TotalInCent() / 100), 2);
+            return 5 * Five + 10 * Ten + 20 * Twenty + 50 * Fifty + 100 * OneHundred + 200 * TwoHundred;
         }
     }
 }
