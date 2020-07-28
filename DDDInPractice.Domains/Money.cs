@@ -56,7 +56,12 @@ namespace DDDInPractice.Domains
         {
             if (amount < 0)
             {
-                throw new Exception("The subtracted amount of money must be greater than 0");
+                throw new Exception("The subtract amount must be greater than 0");
+            }
+
+            if (amount % 5 != 0)
+            {
+                throw new Exception("The subtract amount must be multiple of 5");
             }
 
             if (money.Total() - amount < 0)
@@ -64,7 +69,9 @@ namespace DDDInPractice.Domains
                 throw new Exception("The subtract amount is too big");
             }
 
-            return new Money();
+            var subtractMoney = BreakDownMoneyLargeToSmall(amount);
+
+            return money - subtractMoney;
         }
 
         public static Money operator -(Money m1, Money m2)
@@ -73,6 +80,8 @@ namespace DDDInPractice.Domains
             {
                 throw new Exception("The subtract amount is too big");
             }
+
+            m2 = BreakDownMoneyLargeToSmall(m2.Total());
 
             var m1Array = new[]
             {
@@ -120,6 +129,39 @@ namespace DDDInPractice.Domains
 
             return new Money(m3Array[0] / 5, m3Array[1] / 10, m3Array[2] / 20, m3Array[3] / 50, m3Array[4] / 100,
                 m3Array[5] / 200, m3Array[6] / 500);
+        }
+        
+        public static Money BreakDownMoneyLargeToSmall(int amount)
+        {
+            if (amount < 0)
+            {
+                throw new Exception("The amount to breakdown must be greater than 0");
+            }
+
+            if (amount % 5 != 0)
+            {
+                throw new Exception("The amount to breakdown must be multiple of 5");
+            }
+            
+            (int Five, int Ten, int Twenty, int Fifty, int OneHundred, int TwoHundred, int FiveHundred) money = (0, 0, 0, 0, 0,
+                0, 0);
+            var remain = amount;
+
+            money.FiveHundred = remain / 500;
+            remain = remain % 500;
+            money.TwoHundred = remain / 200;
+            remain = remain % 200;
+            money.OneHundred = remain / 100;
+            remain = remain % 100;
+            money.Fifty = remain / 50;
+            remain = remain % 50;
+            money.Twenty = remain / 20;
+            remain = remain % 20;
+            money.Ten = remain / 10;
+            remain = remain % 10;
+            money.Five = remain / 5;
+            
+            return new Money(money.Five, money.Ten, money.Twenty, money.Fifty, money.OneHundred, money.TwoHundred, money.FiveHundred);
         }
 
         public Money DeepClone()

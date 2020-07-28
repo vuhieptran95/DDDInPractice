@@ -107,6 +107,8 @@ namespace DDDInPractice.Domains
             {
                 throw new Exception("You have spent all your money, nothing left to return!");
             }
+
+            machineMoney = machineMoney - currentAmountCustomerMoney;
         }
 
         public bool IsAbleToReturnMoney()

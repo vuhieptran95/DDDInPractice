@@ -188,16 +188,11 @@ namespace DDDInPractice.Domains.Test
             [Fact]
             public void SomeCustomerMoneyLeft_ReturnMoneyUsingLargeToSmallNotes()
             {
-                var cusMoney = new Money(0, 0, 0, 0, 5, 0, 0);
+                currentAmountCustomerMoney = 20;
 
-                TakeMoney(cusMoney);
+                ReturnMoney();
 
-                Action action = ReturnMoney;
-
-                action.Should().Throw<Exception>()
-                    .WithMessage("You haven't bought anything yet! Please choose an item.");
-
-                machineMoney.Should().Be(_initialMachineMoney + cusMoney);
+                machineMoney.Should().Be(new Money(200, 100, 49, 20, 10, 10, 4));
             }
         }
         

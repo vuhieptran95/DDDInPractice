@@ -39,7 +39,7 @@ namespace DDDInPractice.Domains.Test
                 _ = SampleMoney1 - value;
             };
 
-            action.Should().Throw<Exception>().WithMessage("The subtracted amount of money must be greater than 0");
+            action.Should().Throw<Exception>().WithMessage("The subtract amount must be greater than 0");
         }
 
         [Fact]
@@ -52,7 +52,19 @@ namespace DDDInPractice.Domains.Test
                 _ = SampleMoney1 - value;
             };
 
-            action.Should().Throw<Exception>().WithMessage("The subtracted amount is too big");
+            action.Should().Throw<Exception>().WithMessage("The subtract amount is too big");
+        }
+
+        [Fact]
+        public void CannotSubtractOrBreakDownAmountThatIsNotMultipleOf5()
+        {
+            var amount = 123;
+
+            Action action = () => BreakDownMoneyLargeToSmall(amount);
+            Action action2 = () => { _ = new Money() - amount; };
+
+            action.Should().Throw<Exception>().WithMessage("The amount to breakdown must be multiple of 5");
+            action2.Should().Throw<Exception>().WithMessage("The subtract amount must be multiple of 5");
         }
 
         [Theory]
@@ -123,6 +135,39 @@ namespace DDDInPractice.Domains.Test
             };
 
             action.Should().Throw<Exception>().WithMessage("Unable to do subtraction due to insufficient amount of notes");
+        }
+
+        [Theory]
+        [InlineData(1000,  0,0,0,0,0,0,2)]
+        [InlineData(10,  0,1,0,0,0,0,0)]
+        [InlineData(685,  1,1,1,1,1,0,1)]
+        [InlineData(1685,  1,1,1,1,1,0,3)]
+        public void BreakDownMoneyLargeToSmall_ReturnCorrectResult(int amount, int five, int ten, int twenty, int fifty, int oneHundred, int twoHundred, int fiveHundred)
+        {
+            var money = BreakDownMoneyLargeToSmall(amount);
+            var expectedMoney = new Money(five, ten, twenty, fifty, oneHundred, twoHundred, fiveHundred);
+
+            money.Should().Be(expectedMoney);
+        }
+
+        [Fact]
+        public void BreakDownMoneyLargeToSmall_NegativeAmount_ThrowException()
+        {
+            var amount = -100;
+
+            Action action = () => BreakDownMoneyLargeToSmall(amount);
+
+            action.Should().Throw<Exception>().WithMessage("The amount to breakdown must be greater than 0");
+        }
+        
+        [Fact]
+        public void BreakDownMoneyLargeToSmall_AmountNotMultipleOf5_ThrowException()
+        {
+            var amount = 34;
+
+            Action action = () => BreakDownMoneyLargeToSmall(amount);
+
+            action.Should().Throw<Exception>().WithMessage("The amount to breakdown must be multiple of 5");
         }
     }
 }
