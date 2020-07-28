@@ -63,7 +63,7 @@ namespace DDDInPractice.Domains
             // Clear customer money
             currentAmountCustomerMoney = 0;
             initialCustomerMoney = new Money();
-            
+
             // Raise Transaction started event
         }
 
@@ -108,35 +108,53 @@ namespace DDDInPractice.Domains
                 throw new Exception("You have spent all your money, nothing left to return!");
             }
 
-            machineMoney = machineMoney - currentAmountCustomerMoney;
+            machineMoney -= currentAmountCustomerMoney;
         }
 
         public bool IsAbleToReturnMoney()
         {
-            return false;
+            try
+            {
+                _ = machineMoney - currentAmountCustomerMoney;
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                if (e.Message == "Unable to do subtraction due to insufficient amount of notes")
+                {
+                    return false;
+                }
+
+                throw;
+            }
         }
 
         public void CommitTransaction()
         {
-            // Machine does its job
+            // Check ability to return money
             
+            // Machine does its job
+
             // Return changes to customers
             
+            // Reset customer money
+
             // Reset selectedSlots
-            
+
             // Finish transaction
-            
+
             // Add transaction committed event
         }
 
         public void CancelTransaction()
         {
             // Rollback selected slots and reset
-            
+
             // Return customer's money
-            
+
             // Finish transaction
-            
+
             // Add transaction cancelled event
         }
     }
