@@ -18,10 +18,10 @@ namespace DDDInPractice.Domains.Test
 
         public SnackMachineTest()
         {
-            _sampleSlot1 = new Slot(1, "1", 10, 5, 1);
-            _sampleSlot2 = new Slot(2, "2", 15, 10, 2);
-            _sampleSlot3 = new Slot(3, "3", 20, 15, 3);
-            _zeroQuantitySlot = new Slot(4, "4", 0, 50, 4);
+            _sampleSlot1 = new Slot(1, "1", 10, 5, "1");
+            _sampleSlot2 = new Slot(2, "2", 15, 10, "2");
+            _sampleSlot3 = new Slot(3, "3", 20, 15, "3");
+            _zeroQuantitySlot = new Slot(4, "4", 0, 50, "4");
             _machineMoney = new Money(200, 100, 50, 20, 10, 10, 4);
             _customerMoney = new Money(0, 0, 0, 1, 0, 0, 0);
         }

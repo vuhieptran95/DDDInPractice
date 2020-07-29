@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DDDInPractice.Domains
 {
-    public class SnackMachine
+    public partial class SnackMachine : AggregateRoot
     {
         protected ICollection<Slot> slots;
         protected ICollection<Slot> selectedSlots;
@@ -22,6 +22,7 @@ namespace DDDInPractice.Domains
             machineMoney = new Money();
         }
 
+        public int Id { get; }
         public Money MachineMoney => machineMoney;
         public bool IsInTransaction => isInTransaction;
         public int CurrentAmountCustomerMoney => currentAmountCustomerMoney;
@@ -64,7 +65,8 @@ namespace DDDInPractice.Domains
             currentAmountCustomerMoney = 0;
             initialCustomerMoney = new Money();
 
-            // Raise Transaction started event
+            // Add Transaction started event
+            AddEvents(new TransactionStarted(this.Id));
         }
 
         public void HandleSelectItems(Slot slot)
@@ -130,32 +132,55 @@ namespace DDDInPractice.Domains
             }
         }
 
-        public void CommitTransaction()
+        public void MachineDropItems(out bool isSuccess)
         {
-            // Check ability to return money
-            
-            // Machine does its job
+            Console.WriteLine("Dropping items...");
 
-            // Return changes to customers
-            
-            // Reset customer money
-
-            // Reset selectedSlots
-
-            // Finish transaction
-
-            // Add transaction committed event
+            isSuccess = true;
         }
 
-        public void CancelTransaction()
+        public void MachineReturnMoney(out bool isSuccess)
         {
-            // Rollback selected slots and reset
+            Console.WriteLine("Return customer money...");
 
-            // Return customer's money
+            isSuccess = true;
+        }
 
-            // Finish transaction
+        public void FinalizeTransaction()
+        {
+            currentAmountCustomerMoney = 0;
+            initialCustomerMoney.Clear();
+            selectedSlots.Clear();
+        }
+        
+        public void Rollback()
+        {
+            selectedSlots.GroupBy(ss => ss.Position).ToList().ForEach(g =>
+            {
+                for (int i = 0; i < g.Count(); i++)
+                {
+                    g.First().IncreaseQuantity();
+                }
+            });
 
-            // Add transaction cancelled event
+            currentAmountCustomerMoney = initialCustomerMoney.Total();
+        }
+
+        public void AddTransactionCommittedEvent()
+        {
+            var soldItems = selectedSlots.GroupBy(ss => ss.Position).Select(g =>
+                new TransactionItem(g.First().ProductName, g.First().Price, g.Count())).ToList();
+            var amountCaptured = initialCustomerMoney.Total() - currentAmountCustomerMoney;
+
+            AddEvents(new TransactionCommitted(Id, amountCaptured, soldItems));
+        }
+
+        public void AddTransactionCancelledEvent(string reasonPhrase)
+        {
+            var cancelledItems = selectedSlots.GroupBy(ss => ss.Position).Select(g =>
+                new TransactionItem(g.First().ProductName, g.First().Price, g.Count())).ToList();
+            
+            AddEvents(new TransactionCancelled(Id, initialCustomerMoney.Total(), cancelledItems, reasonPhrase));
         }
     }
 }

@@ -20,13 +20,13 @@ namespace DDDInPractice.Domains
             FiveHundred = fiveHundred;
         }
 
-        public int Five { get; }
-        public int Ten { get; }
-        public int Twenty { get; }
-        public int Fifty { get; }
-        public int OneHundred { get; }
-        public int TwoHundred { get; }
-        public int FiveHundred { get; }
+        public int Five { get; private set; }
+        public int Ten { get; private set; }
+        public int Twenty { get; private set; }
+        public int Fifty { get; private set; }
+        public int OneHundred { get; private set; }
+        public int TwoHundred { get; private set; }
+        public int FiveHundred { get; private set; }
 
         public bool Equals(Money other)
         {
@@ -180,6 +180,17 @@ namespace DDDInPractice.Domains
         {
             return 5 * Five + 10 * Ten + 20 * Twenty + 50 * Fifty + 100 * OneHundred + 200 * TwoHundred +
                    500 * FiveHundred;
+        }
+
+        public void Clear()
+        {
+            Five = 0;
+            Ten = 0;
+            Twenty = 0;
+            Fifty = 0;
+            OneHundred = 0;
+            TwoHundred = 0;
+            FiveHundred = 0;
         }
     }
 }

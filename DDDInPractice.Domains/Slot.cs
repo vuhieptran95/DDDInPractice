@@ -4,7 +4,7 @@ namespace DDDInPractice.Domains
 {
     public class Slot
     {
-        public Slot(int id, string productName, int productCount, int price, int position)
+        public Slot(int id, string productName, int productCount, int price, string position)
         {
             Id = id;
             ProductName = productName;
@@ -17,7 +17,7 @@ namespace DDDInPractice.Domains
         public string ProductName { get; protected set; }
         public int ProductCount { get; protected set; }
         public int Price { get; protected set; }
-        public int Position { get; protected set; }
+        public string Position { get; protected set; }
         
         public void DecreaseQuantity()
         {
