@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DDDInPractice.Domains
 {
-    public partial class SnackMachine
+    public partial class VendingMachine
     {
         public class TransactionStarted : DomainEvent
         {

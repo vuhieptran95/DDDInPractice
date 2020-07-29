@@ -6,7 +6,7 @@ using Xunit;
 
 namespace DDDInPractice.Domains.Test
 {
-    public class SnackMachineTest : SnackMachine
+    public class VendingMachineTest : VendingMachine
     {
         private Slot _sampleSlot1;
         private Slot _sampleSlot2;
@@ -16,7 +16,7 @@ namespace DDDInPractice.Domains.Test
         private Money _machineMoney;
         private Money _customerMoney;
 
-        public SnackMachineTest()
+        public VendingMachineTest()
         {
             _sampleSlot1 = new Slot(1, "1", 10, 5, "1");
             _sampleSlot2 = new Slot(2, "2", 15, 10, "2");
@@ -26,7 +26,7 @@ namespace DDDInPractice.Domains.Test
             _customerMoney = new Money(0, 0, 0, 1, 0, 0, 0);
         }
 
-        public new class AddSlotsTest : SnackMachineTest
+        public new class AddSlotsTest : VendingMachineTest
         {
             [Fact]
             public void Add1Slot_SlotsCountIncrease1()
@@ -61,7 +61,7 @@ namespace DDDInPractice.Domains.Test
             }
         }
 
-        public class StartTransactionTest : SnackMachineTest
+        public class StartTransactionTest : VendingMachineTest
         {
             [Fact]
             public void WhenStart_FlagIsSetToTrue_CustomerMoneyResets()
@@ -74,7 +74,7 @@ namespace DDDInPractice.Domains.Test
             }
         }
 
-        public class HandleSelectItemsTest : SnackMachineTest
+        public class HandleSelectItemsTest : VendingMachineTest
         {
             private Money initialMachineMoney;
             private int quantity;
@@ -160,7 +160,7 @@ namespace DDDInPractice.Domains.Test
             }
         }
 
-        public class ReturnMoneyTest : SnackMachineTest
+        public class ReturnMoneyTest : VendingMachineTest
         {
             private Money _initialMachineMoney;
 
@@ -196,7 +196,7 @@ namespace DDDInPractice.Domains.Test
             }
         }
         
-        public class RemoveLastSelectedSlotTest : SnackMachineTest
+        public class RemoveLastSelectedSlotTest : VendingMachineTest
         {
             [Fact]
             public void NoSlotsInSelectedSlots_ThrowException()

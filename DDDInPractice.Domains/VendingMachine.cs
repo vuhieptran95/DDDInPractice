@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DDDInPractice.Domains
 {
-    public partial class SnackMachine : AggregateRoot
+    public partial class VendingMachine : AggregateRoot
     {
         protected ICollection<Slot> slots;
         protected ICollection<Slot> selectedSlots;
@@ -14,7 +14,7 @@ namespace DDDInPractice.Domains
         protected Money initialCustomerMoney;
         protected bool isInTransaction;
 
-        public SnackMachine()
+        public VendingMachine()
         {
             slots = new List<Slot>();
             selectedSlots = new List<Slot>();
@@ -22,8 +22,9 @@ namespace DDDInPractice.Domains
             machineMoney = new Money();
         }
 
-        public int Id { get; }
+        public int Id { get; protected set; }
         public Money MachineMoney => machineMoney;
+        public Money InitialCustomerMoney => initialCustomerMoney;
         public bool IsInTransaction => isInTransaction;
         public int CurrentAmountCustomerMoney => currentAmountCustomerMoney;
         public IEnumerable<Slot> Slots => slots;

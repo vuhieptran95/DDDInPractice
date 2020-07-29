@@ -18,7 +18,12 @@ namespace DDDInPractice.Domains
             _domainEvents.Add(domainEvent);
         }
 
-        public void RemoveEvents()
+        public void RemoveEvent(DomainEvent domainEvent)
+        {
+            _domainEvents.Remove(domainEvent);
+        }
+
+        public void RemoveEvent()
         {
             _domainEvents.Clear();
         }
