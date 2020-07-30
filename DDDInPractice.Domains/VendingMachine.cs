@@ -10,6 +10,7 @@ namespace DDDInPractice.Domains
         protected ICollection<Slot> slots;
         protected ICollection<Slot> selectedSlots;
         protected Money machineMoney;
+        protected Money currentMachineMoney;
         protected int currentAmountCustomerMoney;
         protected Money initialCustomerMoney;
         protected bool isInTransaction;
@@ -20,6 +21,7 @@ namespace DDDInPractice.Domains
             selectedSlots = new List<Slot>();
             initialCustomerMoney = new Money();
             machineMoney = new Money();
+            currentMachineMoney = new Money();
         }
 
         public int Id { get; protected set; }
@@ -48,6 +50,7 @@ namespace DDDInPractice.Domains
         public void LoadMoney(Money addedMoney)
         {
             machineMoney += addedMoney;
+            currentMachineMoney = machineMoney.DeepClone();
         }
 
         public void TakeMoney(Money money)
@@ -55,7 +58,7 @@ namespace DDDInPractice.Domains
             currentAmountCustomerMoney += money.Total();
             initialCustomerMoney += money;
 
-            machineMoney += money;
+            currentMachineMoney += money;
         }
 
         public void StartTransaction()
@@ -111,14 +114,14 @@ namespace DDDInPractice.Domains
                 throw new Exception("You have spent all your money, nothing left to return!");
             }
 
-            machineMoney -= currentAmountCustomerMoney;
+            currentMachineMoney -= currentAmountCustomerMoney;
         }
 
         public bool IsAbleToReturnMoney()
         {
             try
             {
-                _ = machineMoney - currentAmountCustomerMoney;
+                _ = currentMachineMoney - currentAmountCustomerMoney;
 
                 return true;
             }

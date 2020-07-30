@@ -76,7 +76,6 @@ namespace DDDInPractice.Domains.Test
 
         public class HandleSelectItemsTest : VendingMachineTest
         {
-            private Money initialMachineMoney;
             private int quantity;
 
             public HandleSelectItemsTest()
@@ -84,7 +83,6 @@ namespace DDDInPractice.Domains.Test
                 StartTransaction();
 
                 LoadMoney(_machineMoney);
-                initialMachineMoney = _machineMoney.DeepClone();
 
                 slots = new List<Slot>() {_sampleSlot1, _sampleSlot2, _zeroQuantitySlot};
                 quantity = _sampleSlot1.ProductCount;
@@ -95,7 +93,7 @@ namespace DDDInPractice.Domains.Test
             [Fact]
             public void TakeCustomerMoney_MachineMoneyIncreaseSameAmount()
             {
-                machineMoney.Should().Be(initialMachineMoney + _customerMoney);
+                currentMachineMoney.Should().Be(machineMoney + _customerMoney);
             }
 
             [Fact]
@@ -162,12 +160,9 @@ namespace DDDInPractice.Domains.Test
 
         public class ReturnMoneyTest : VendingMachineTest
         {
-            private Money _initialMachineMoney;
-
             public ReturnMoneyTest()
             {
                 LoadMoney(_machineMoney);
-                _initialMachineMoney = _machineMoney.DeepClone();
 
                 slots = new List<Slot>() {_sampleSlot1, _sampleSlot2, _zeroQuantitySlot};
             }
@@ -182,7 +177,7 @@ namespace DDDInPractice.Domains.Test
                 action.Should().Throw<Exception>()
                     .WithMessage("You have spent all your money, nothing left to return!");
 
-                machineMoney.Total().Should().Be(_initialMachineMoney.Total() + currentAmountCustomerMoney);
+                currentMachineMoney.Total().Should().Be(machineMoney.Total() + currentAmountCustomerMoney);
             }
 
             [Fact]
@@ -192,7 +187,7 @@ namespace DDDInPractice.Domains.Test
 
                 ReturnMoney();
 
-                machineMoney.Should().Be(new Money(200, 100, 49, 20, 10, 10, 4));
+                currentMachineMoney.Should().Be(new Money(200, 100, 49, 20, 10, 10, 4));
             }
         }
         

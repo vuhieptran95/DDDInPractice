@@ -12,3 +12,9 @@ Customers come to these machines to buy stuff:
 ##### Machines return items and subtract customer's money
 ##### Customers click `return money`, take returned money if have any
  - Customers may or may not take returned money
+ 
+ 
+ # Technical Stuff
+```
+dotnet ef migrations add <migration_name> --startup-project DDDInPractice.UI.Web/ --project DDDInPractice.Persistence
+```
