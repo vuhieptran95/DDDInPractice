@@ -5,9 +5,9 @@ using ResponsibilityChain;
 
 namespace DDDInPractice.Persistence.Features
 {
-    public class TestCommand : Request<Nothing>
+    public class TestCommand : Request<int>
     {
-        public class Execute : IExecution<TestCommand, Nothing>
+        public class Execute : IExecution<TestCommand, int>
         {
             public Task HandleAsync(TestCommand request)
             {
