@@ -5,8 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\DDDInPractice.Application\DDDInPractice.Application.csproj" />
       <ProjectReference Include="..\DDDInPractice.Domains\DDDInPractice.Domains.csproj" />
-      <ProjectReference Include="..\DDDInPractice.Persistence\DDDInPractice.Persistence.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
     </ItemGroup>
 
 

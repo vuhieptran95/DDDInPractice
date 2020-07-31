@@ -16,5 +16,5 @@ Customers come to these machines to buy stuff:
  
  # Technical Stuff
 ```
-dotnet ef migrations add <migration_name> --startup-project DDDInPractice.UI.Web/ --project DDDInPractice.Persistence
+dotnet ef migrations add <migration_name> --startup-project DDDInPractice.UI.Web/ --project DDDInPractice.Application
 ```

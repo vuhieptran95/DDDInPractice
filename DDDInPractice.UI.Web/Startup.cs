@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using DDDInPractice.Persistence;
+using DDDInPractice.Persistence.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -15,6 +17,18 @@ using Microsoft.Extensions.Logging;
 
 namespace DDDInPractice.UI.Web
 {
+    public interface ITestService
+    {
+        void Test();
+    }
+    public class TestService : ITestService
+    {
+        public void Test()
+        {
+            
+        }
+    }
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -42,7 +56,7 @@ namespace DDDInPractice.UI.Web
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -50,6 +64,11 @@ namespace DDDInPractice.UI.Web
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        }
+        
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            builder.RegisterModule(new AutofacModule());
         }
     }
 }
