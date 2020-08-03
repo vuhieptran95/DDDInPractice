@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Autofac;
 using DDDInPractice.Persistence.Features;
+using DDDInPractice.Persistence.Infrastructure.Requests;
 using DDDInPractice.Persistence.Infrastructure.Requests.Authorizations;
 using DDDInPractice.Persistence.Infrastructure.Requests.Caching;
 using DDDInPractice.Persistence.Infrastructure.Requests.Executions;
@@ -8,8 +9,11 @@ using DDDInPractice.Persistence.Infrastructure.Requests.Logging;
 using DDDInPractice.Persistence.Infrastructure.Requests.RequestContexts;
 using DDDInPractice.Persistence.Infrastructure.Requests.RequestEvents;
 using DDDInPractice.Persistence.Infrastructure.Requests.Validations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using ResponsibilityChain;
+using Serilog;
 using Module = Autofac.Module;
 
 namespace DDDInPractice.Persistence.Infrastructure
@@ -20,6 +24,15 @@ namespace DDDInPractice.Persistence.Infrastructure
         {
             var currentAssembly = Assembly.GetExecutingAssembly();
 
+            builder.Register<ILogger>(c =>
+            {
+                return new LoggerConfiguration()
+                    .WriteTo.Console()
+                    .WriteTo.Seq("http://localhost:5341")
+                    .CreateLogger();
+            })
+                .SingleInstance();
+            
             builder.RegisterType<Mediator>()
                 .AsImplementedInterfaces()
                 .InstancePerLifetimeScope();
@@ -29,56 +42,57 @@ namespace DDDInPractice.Persistence.Infrastructure
                 .InstancePerLifetimeScope();
 
             builder.RegisterType<MemoryCache>()
+                .AsSelf()
                 .AsImplementedInterfaces()
                 .SingleInstance();
 
             builder.RegisterGeneric(typeof(DefaultHandler<,>)).InstancePerLifetimeScope();
-            
+
             builder.RegisterGeneric(typeof(RequestHandler<,>)).InstancePerLifetimeScope();
-            
-            
+
+
             builder.RegisterGeneric(typeof(AuthorizationConfigBase<,>)).InstancePerLifetimeScope();
             builder.RegisterGeneric(typeof(AuthorizationHandler<,>)).InstancePerLifetimeScope();
-            
+
             builder.RegisterAssemblyTypes(currentAssembly)
                 .AsClosedTypesOf(typeof(IPreAuthorizationRule<,>))
                 .InstancePerLifetimeScope();
-            
+
             builder.RegisterAssemblyTypes(currentAssembly)
                 .AsClosedTypesOf(typeof(IPostAuthorizationRule<,>))
                 .InstancePerLifetimeScope();
-            
+
             builder.RegisterGeneric(typeof(DefaultHandler<,>)).InstancePerLifetimeScope();
             builder.RegisterGeneric(typeof(ValidationHandlerBase<,>)).InstancePerLifetimeScope();
             builder.RegisterGeneric(typeof(ExecutionHandlerBase<,>)).InstancePerLifetimeScope();
             builder.RegisterGeneric(typeof(LoggingHandler<,>)).InstancePerLifetimeScope();
             builder.RegisterGeneric(typeof(RequestEventHandler<,>)).InstancePerLifetimeScope();
-            
+
             builder.RegisterGeneric(typeof(CacheHandler<,>)).InstancePerLifetimeScope();
             builder.RegisterGeneric(typeof(CacheConfig<>))
                 .As(typeof(ICacheConfig<>))
                 .InstancePerLifetimeScope();
-            
+
             builder.RegisterGeneric(typeof(DefaultAuthorizationConfig<>))
                 .As(typeof(IAuthorizationConfig<>))
                 .InstancePerLifetimeScope();
-            
+
             builder.RegisterAssemblyTypes(currentAssembly)
                 .AsClosedTypesOf(typeof(ICacheConfig<>))
                 .InstancePerLifetimeScope();
-            
+
             builder.RegisterAssemblyTypes(currentAssembly)
                 .AsClosedTypesOf(typeof(IAuthorizationConfig<>))
                 .InstancePerLifetimeScope();
-                
+
             builder.RegisterAssemblyTypes(currentAssembly)
                 .AsClosedTypesOf(typeof(IPreValidation<,>))
                 .InstancePerLifetimeScope();
-            
+
             builder.RegisterAssemblyTypes(currentAssembly)
                 .AsClosedTypesOf(typeof(IPostValidation<,>))
                 .InstancePerLifetimeScope();
-            
+
             builder.RegisterAssemblyTypes(currentAssembly)
                 .AsClosedTypesOf(typeof(IExecution<,>))
                 .InstancePerLifetimeScope();
@@ -90,7 +104,7 @@ namespace DDDInPractice.Persistence.Infrastructure
 
             builder.RegisterAssemblyTypes(currentAssembly)
                 .AsClosedTypesOf(typeof(IRequest<>));
-            
+
             base.Load(builder);
         }
     }

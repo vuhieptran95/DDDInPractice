@@ -7,7 +7,7 @@ using DDDInPractice.Persistence.Infrastructure.Requests.RequestEvents;
 using DDDInPractice.Persistence.Infrastructure.Requests.Validations;
 using ResponsibilityChain;
 
-namespace DDDInPractice.Persistence.Infrastructure
+namespace DDDInPractice.Persistence.Infrastructure.Requests
 {
     public class RequestHandler<TRequest, TResponse> : Handler<TRequest, TResponse> where TRequest: Request<TResponse>
     {
@@ -17,7 +17,7 @@ namespace DDDInPractice.Persistence.Infrastructure
             AuthorizationHandler<TRequest, TResponse> authorizationHandler,
             ValidationHandlerBase<TRequest, TResponse> validationHandlerBase,
             RequestEventHandler<TRequest, TResponse> requestEventHandler,
-            CacheHandler<TRequest, TResponse> cacheHandler,
+            // CacheHandler<TRequest, TResponse> cacheHandler,
             ExecutionHandlerBase<TRequest, TResponse> executionHandlerBase)
         {
             AddHandler(loggingHandler);
@@ -25,7 +25,7 @@ namespace DDDInPractice.Persistence.Infrastructure
             AddHandler(authorizationHandler);
             AddHandler(validationHandlerBase);
             AddHandler(requestEventHandler);
-            AddHandler(cacheHandler);
+            // AddHandler(cacheHandler);
             AddHandler(executionHandlerBase);
         }
     }

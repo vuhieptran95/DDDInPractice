@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using DDDInPractice.Persistence.Infrastructure.Requests.Executions;
 using DDDInPractice.Persistence.Infrastructure.Requests.RequestContexts;
+using Microsoft.EntityFrameworkCore;
 using ResponsibilityChain;
 
 namespace DDDInPractice.Persistence.Features
@@ -9,9 +10,16 @@ namespace DDDInPractice.Persistence.Features
     {
         public class Execute : IExecution<TestCommand, int>
         {
-            public Task HandleAsync(TestCommand request)
+            private readonly AppDbContext _dbContext;
+
+            public Execute(AppDbContext dbContext)
             {
-                throw new System.NotImplementedException();
+                _dbContext = dbContext;
+            }
+            public async Task HandleAsync(TestCommand request)
+            {
+                var machine = await _dbContext.VendingMachines.ToListAsync();
+                
             }
         }
     }

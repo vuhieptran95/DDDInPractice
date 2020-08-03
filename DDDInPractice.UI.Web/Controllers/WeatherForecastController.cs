@@ -34,8 +34,6 @@ namespace DDDInPractice.UI.Web.Controllers
         [HttpGet]
         public async Task<IEnumerable<WeatherForecast>> Get()
         {
-            await _mediator.SendAsync(new TestCommand());
-            
             var context = _serviceProvider.GetService<AppDbContext>();
             var all = context.VendingMachines.ToList();
             var rng = new Random();

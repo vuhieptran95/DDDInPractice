@@ -17,18 +17,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DDDInPractice.UI.Web
 {
-    public interface ITestService
-    {
-        void Test();
-    }
-    public class TestService : ITestService
-    {
-        public void Test()
-        {
-            
-        }
-    }
-
     public class Startup
     {
         public Startup(IConfiguration configuration)
