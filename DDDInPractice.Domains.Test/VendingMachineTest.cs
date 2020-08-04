@@ -64,6 +64,15 @@ namespace DDDInPractice.Domains.Test
         public class StartTransactionTest : VendingMachineTest
         {
             [Fact]
+            public void WhenStart_FlagIsAlreadyTrue_ThrowException()
+            {
+                isInTransaction = true;
+                Action action = StartTransaction;
+
+                action.Should().Throw<Exception>().WithMessage("Someone is using the machine, please wait");
+            }
+            
+            [Fact]
             public void WhenStart_FlagIsSetToTrue_CustomerMoneyResets()
             {
                 this.StartTransaction();
@@ -71,6 +80,8 @@ namespace DDDInPractice.Domains.Test
                 isInTransaction.Should().Be(true);
                 currentAmountCustomerMoney.Should().Be(0);
                 initialCustomerMoney.Should().Be(new Money());
+
+                currentMachineMoney.Should().Be(machineMoney);
             }
         }
 
@@ -102,7 +113,7 @@ namespace DDDInPractice.Domains.Test
                 var selectedSlotsCount = selectedSlots.Count;
                 var currentCustMoney = currentAmountCustomerMoney;
 
-                HandleSelectItems(_sampleSlot1);
+                HandleSelectItems(_sampleSlot1.Position);
 
                 _sampleSlot1.ProductCount.Should().Be(quantity - 1);
 
@@ -119,7 +130,7 @@ namespace DDDInPractice.Domains.Test
                 var selectedSlotsCount = selectedSlots.Count;
                 var currentCustMoney = currentAmountCustomerMoney;
 
-                Action action = () => HandleSelectItems(_zeroQuantitySlot);
+                Action action = () => HandleSelectItems(_zeroQuantitySlot.Position);
 
                 action.Should().Throw<Exception>().WithMessage("No items left in this slot");
 
@@ -137,7 +148,7 @@ namespace DDDInPractice.Domains.Test
                 currentAmountCustomerMoney = 5;
                 var currentCustMoney = currentAmountCustomerMoney;
 
-                Action action = () => HandleSelectItems(_sampleSlot2);
+                Action action = () => HandleSelectItems(_sampleSlot2.Position);
 
                 action.Should().Throw<Exception>().WithMessage("You don't have enough money left to buy this item");
 
@@ -151,7 +162,7 @@ namespace DDDInPractice.Domains.Test
             {
                 var selectedSlotsCount = selectedSlots.Count;
 
-                Action action = () => HandleSelectItems(_sampleSlot3);
+                Action action = () => HandleSelectItems(_sampleSlot3.Position);
 
                 action.Should().Throw<Exception>().WithMessage("The item you're trying to buy doesn't exist");
                 selectedSlots.Count.Should().Be(selectedSlotsCount);
@@ -217,6 +228,20 @@ namespace DDDInPractice.Domains.Test
                 selectedSlots.Count.Should().Be(0);
                 _sampleSlot1.ProductCount.Should().Be(count + 1);
                 currentAmountCustomerMoney.Should().Be(105);
+            }
+        }
+        
+        public new class FinalizeTransactionTest: VendingMachineTest 
+        {
+            [Fact]
+            public void AssignCurrentMachineMoneyToMachineMoney_ResetCustomerMoney_ResetSelectedSlot()
+            {
+                this.FinalizeTransaction();
+
+                machineMoney.Should().Be(currentMachineMoney);
+                currentAmountCustomerMoney.Should().Be(0);
+                initialCustomerMoney.Should().Be(new Money());
+                selectedSlots.Count.Should().Be(0);
             }
         }
     }

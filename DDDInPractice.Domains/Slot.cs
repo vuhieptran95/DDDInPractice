@@ -19,7 +19,7 @@ namespace DDDInPractice.Domains
         public int Price { get; protected set; }
         public string Position { get; protected set; }
 
-        public VendingMachine VendingMachine { get; protected set; }
+        public VendingMachine VendingMachine { get; set; }
         public int VendingMachineId { get; protected set; }
         
         public void DecreaseQuantity()

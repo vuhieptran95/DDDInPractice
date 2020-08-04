@@ -20,7 +20,6 @@ namespace DDDInPractice.Persistence
             {
                 e.HasKey(m => m.Id);
                 e.Property(m => m.Id).HasColumnName("MachineId");
-                e.Property(m => m.IsInTransaction).HasColumnName("IsInTransaction");
                 e.HasMany(m => m.Slots).WithOne(s => s.VendingMachine).HasForeignKey(s => s.VendingMachineId);
                 e.OwnsOne(m => m.MachineMoney, money =>
                 {
@@ -37,6 +36,8 @@ namespace DDDInPractice.Persistence
                 e.Ignore(m => m.SelectedSlots);
                 e.Ignore(m => m.InitialCustomerMoney);
                 e.Ignore(m => m.CurrentAmountCustomerMoney);
+                e.Ignore(m => m.CurrentMachineMoney);
+                e.Ignore(m => m.IsInTransaction);
             });
 
             modelBuilder.Entity<Slot>(e =>
@@ -49,6 +50,8 @@ namespace DDDInPractice.Persistence
                 e.Property(s => s.ProductName).HasColumnName("ProductName");
                 e.Property(s => s.VendingMachineId).HasColumnName("VendingMachineId");
                 e.HasOne(s => s.VendingMachine).WithMany(m => m.Slots).HasForeignKey(s => s.VendingMachineId);
+
+                e.Ignore(s => s.VendingMachine);
             });
 
         }

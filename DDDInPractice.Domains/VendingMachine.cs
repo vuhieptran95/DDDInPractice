@@ -26,6 +26,7 @@ namespace DDDInPractice.Domains
 
         public int Id { get; protected set; }
         public Money MachineMoney => machineMoney;
+        public Money CurrentMachineMoney => currentMachineMoney;
         public Money InitialCustomerMoney => initialCustomerMoney;
         public bool IsInTransaction => isInTransaction;
         public int CurrentAmountCustomerMoney => currentAmountCustomerMoney;
@@ -63,19 +64,27 @@ namespace DDDInPractice.Domains
 
         public void StartTransaction()
         {
+            if (isInTransaction)
+            {
+                throw new Exception("Someone is using the machine, please wait");
+            }
+            
             isInTransaction = true;
 
             // Clear customer money
             currentAmountCustomerMoney = 0;
             initialCustomerMoney = new Money();
 
+            // clone current machine money
+            currentMachineMoney = machineMoney.DeepClone();
+            
             // Add Transaction started event
             AddEvents(new TransactionStarted(this.Id));
         }
 
-        public void HandleSelectItems(Slot slot)
+        public void HandleSelectItems(string position)
         {
-            var actualSlot = Slots.FirstOrDefault(s => s.Position == slot.Position);
+            var actualSlot = Slots.FirstOrDefault(s => s.Position == position);
             if (actualSlot == null)
             {
                 throw new Exception("The item you're trying to buy doesn't exist");
@@ -152,6 +161,7 @@ namespace DDDInPractice.Domains
 
         public void FinalizeTransaction()
         {
+            machineMoney = currentMachineMoney;
             currentAmountCustomerMoney = 0;
             initialCustomerMoney.Clear();
             selectedSlots.Clear();
