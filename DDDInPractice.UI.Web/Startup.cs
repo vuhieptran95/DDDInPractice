@@ -17,18 +17,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DDDInPractice.UI.Web
 {
-    public interface ITestService
-    {
-        void Test();
-    }
-    public class TestService : ITestService
-    {
-        public void Test()
-        {
-            
-        }
-    }
-
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -47,6 +35,8 @@ namespace DDDInPractice.UI.Web
             });
             
             services.AddControllers();
+            
+            services.AddSpaStaticFiles(opt => opt.RootPath = "wwwroot/client-app");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
