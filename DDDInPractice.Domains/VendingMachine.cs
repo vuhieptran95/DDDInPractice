@@ -116,7 +116,7 @@ namespace DDDInPractice.Domains
             selectedSlots.Remove(lastSlot);
         }
 
-        public void ReturnMoney()
+        public void CalculateReturnMoney()
         {
             if (currentAmountCustomerMoney == 0)
             {
@@ -152,7 +152,7 @@ namespace DDDInPractice.Domains
             isSuccess = true;
         }
 
-        public void MachineReturnMoney(out bool isSuccess)
+        public void MachineDropChange(out bool isSuccess)
         {
             Console.WriteLine("Return customer money...");
 

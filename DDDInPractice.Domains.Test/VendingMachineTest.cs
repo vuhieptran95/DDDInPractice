@@ -183,7 +183,7 @@ namespace DDDInPractice.Domains.Test
             {
                 currentAmountCustomerMoney = 0;
 
-                Action action = ReturnMoney;
+                Action action = CalculateReturnMoney;
 
                 action.Should().Throw<Exception>()
                     .WithMessage("You have spent all your money, nothing left to return!");
@@ -196,7 +196,7 @@ namespace DDDInPractice.Domains.Test
             {
                 currentAmountCustomerMoney = 20;
 
-                ReturnMoney();
+                CalculateReturnMoney();
 
                 currentMachineMoney.Should().Be(new Money(200, 100, 49, 20, 10, 10, 4));
             }

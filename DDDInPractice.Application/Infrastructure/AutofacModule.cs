@@ -12,6 +12,7 @@ using DDDInPractice.Persistence.Infrastructure.Requests.Validations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using ResponsibilityChain;
 using Serilog;
 using Module = Autofac.Module;
@@ -23,15 +24,6 @@ namespace DDDInPractice.Persistence.Infrastructure
         protected override void Load(ContainerBuilder builder)
         {
             var currentAssembly = Assembly.GetExecutingAssembly();
-
-            builder.Register<ILogger>(c =>
-            {
-                return new LoggerConfiguration()
-                    .WriteTo.Console()
-                    .WriteTo.Seq("http://localhost:5341")
-                    .CreateLogger();
-            })
-                .SingleInstance();
             
             builder.RegisterType<Mediator>()
                 .AsImplementedInterfaces()
