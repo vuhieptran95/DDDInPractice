@@ -71,8 +71,9 @@ namespace DDDInPractice.UI.Web.Controllers
         }
         
         [HttpPut("{machineId}/transactions")]
-        public async Task<ActionResult> HandleBuy()
+        public async Task<ActionResult> HandleCommitTransaction([FromRoute]int machineId)
         {
+            await _mediator.SendAsync(new CommitTransationCommand(machineId));
             return Ok();
         }
     }

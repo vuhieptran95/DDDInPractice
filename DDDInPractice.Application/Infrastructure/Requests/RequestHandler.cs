@@ -17,7 +17,7 @@ namespace DDDInPractice.Persistence.Infrastructure.Requests
             AuthorizationHandler<TRequest, TResponse> authorizationHandler,
             ValidationHandlerBase<TRequest, TResponse> validationHandlerBase,
             RequestEventHandler<TRequest, TResponse> requestEventHandler,
-            // CacheHandler<TRequest, TResponse> cacheHandler,
+            CacheHandler<TRequest, TResponse> cacheHandler,
             ExecutionHandlerBase<TRequest, TResponse> executionHandlerBase)
         {
             AddHandler(loggingHandler);
@@ -25,7 +25,7 @@ namespace DDDInPractice.Persistence.Infrastructure.Requests
             AddHandler(authorizationHandler);
             AddHandler(validationHandlerBase);
             AddHandler(requestEventHandler);
-            // AddHandler(cacheHandler);
+            AddHandler(cacheHandler);
             AddHandler(executionHandlerBase);
         }
     }
