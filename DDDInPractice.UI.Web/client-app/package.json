@@ -16,7 +16,7 @@
     "jquery": "^3.5.1",
     "lodash": "^4.17.19",
     "material-design-icons-iconfont": "^5.0.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "styled-notifications": "^1.0.3",
     "ts-expression-evaluator": "latest",
     "vue": "^2.6.11",
